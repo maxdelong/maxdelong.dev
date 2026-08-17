@@ -1,50 +1,62 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: [TEMPLATE] → 1.0.0 (initial ratification)
+- Modified principles: n/a (first version)
+- Added sections: Core Principles (5), Technology Constraints, Governance
+- Removed sections: none
+- Follow-up TODOs: none
+-->
+
+# maxdelong.dev Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Simplicity & YAGNI
+Ship working features before polish. Do not build speculative abstractions,
+config layers, or infrastructure for needs that do not yet exist. This is a
+solo-maintained side project — every layer of indirection has to be justified
+by a problem it solves today, not one it might solve later.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Type Safety End-to-End
+TypeScript is used everywhere. Types flow from the Supabase schema through
+API routes to the UI without being widened or re-declared along the way.
+`any` is not used to route around a type error; the underlying type is fixed
+instead.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. App Isolation
+Each sub-app under `apps/*` owns its own routes, components, and logic.
+Code only moves into `lib/` once it is genuinely shared by more than one
+sub-app. Sub-apps do not import from one another directly.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Pragmatic Testing
+Critical logic — API routes, data transforms, anything that touches the
+database — is covered by tests. Exhaustive UI/component test coverage is
+NOT required; this is a personal project maintained by one person, and test
+effort should go where correctness actually matters (data integrity,
+external API integration) rather than into coverage percentage.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Always Deployable
+`main` always builds and deploys cleanly to Vercel. Broken states are kept
+to short-lived branches, never left on `main`.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technology Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- **Framework**: Next.js + React + TypeScript
+- **Data**: Supabase (PostgreSQL)
+- **Hosting**: Vercel
+- **External APIs**: OpenDota API (dota-tracker app), others as sub-apps require them
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+Sub-apps may introduce app-specific dependencies (e.g. a charting library for
+one app) without requiring a constitution amendment, as long as they don't
+conflict with these constraints or leak into other sub-apps.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes ad hoc practice for anything it covers.
+Amendments are made by re-running the constitution workflow as the project's
+needs evolve — versioned per semantic versioning (MAJOR: principle removed
+or redefined incompatibly; MINOR: principle or section added; PATCH:
+clarification/wording). There is no separate compliance-review process
+beyond the author's own judgment, consistent with Principle I.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-08-09 | **Last Amended**: 2026-08-09

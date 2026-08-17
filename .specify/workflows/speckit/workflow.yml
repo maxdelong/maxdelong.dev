@@ -23,6 +23,9 @@ requires:
       - "claude"
       - "copilot"
       - "gemini"
+      - "claude"
+      - "copilot"
+      - "gemini"
       - "opencode"
 
 inputs:
