@@ -154,3 +154,17 @@ info (e.g., games played, win rate on that hero).
   private-profile opt-in or authorization flow.
 - The search flow is unauthenticated — no visitor account or login is
   required.
+
+## Status & Next Step
+
+**Current state**: Implemented and verified against the live OpenDota
+API. See [tasks.md](./tasks.md) for full verification details and
+implementation notes (SteamID64 precision handling, hero-pool cap).
+
+**Resolved earlier**: `apps/dota-tracker/CONSTITUTION.md` was removed —
+it predated the root constitution, was never referenced by CLAUDE.md as
+authoritative, and contradicted both the root constitution and this
+spec's own Assumptions (no persistence, no MMR history).
+
+**Next step**: All three features are now implemented. Blog and
+Portfolio remain unbuilt registry placeholders.

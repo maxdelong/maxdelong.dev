@@ -110,11 +110,6 @@ read_feature_json_feature_directory() {
             _fd=''
         fi
     fi
-    local _fd=''
-    if command -v jq >/dev/null 2>&1; then
-        if ! _fd=$(jq -r '.feature_directory // empty' "$fj" 2>/dev/null); then
-            _fd=''
-        fi
     if [[ -z "$_fd" ]] && command -v python3 >/dev/null 2>&1; then
         # Use Python so pretty-printed/multi-line JSON still parses correctly.
         if ! _fd=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); v=d.get('feature_directory'); print(v if v else '')" "$fj" 2>/dev/null); then
@@ -122,11 +117,6 @@ read_feature_json_feature_directory() {
         fi
     fi
     if [[ -z "$_fd" ]]; then
-        # Last-resort single-line grep/sed fallback. The `|| true` guards against
-        # grep returning 1 (no match) aborting under `set -e` / `pipefail`.
-        _fd=$( { grep -E '"feature_directory"[[:space:]]*:' "$fj" 2>/dev/null || true; } \
-            | sed -E 's/^.*"feature_directory"[[:space:]]*:[[:space:]]*"?([^"}]*)"?[[:space:]]*,?[[:space:]]*$/\1/' )
-    fi
         # Last-resort single-line grep/sed fallback. The `|| true` guards against
         # grep returning 1 (no match) aborting under `set -e` / `pipefail`.
         _fd=$( { grep -E '"feature_directory"[[:space:]]*:' "$fj" 2>/dev/null || true; } \
@@ -273,9 +263,6 @@ get_invoke_separator() {
                 esac
             fi
         fi
-                esac
-            fi
-        fi
 
         if [[ "$parsed" -eq 0 ]] && command -v python3 >/dev/null 2>&1; then
             local py_separator
@@ -357,24 +344,6 @@ PY
                 "."|"-") separator="$awk_separator" ;;
             esac
         fi
-import json
-import sys
-
-try:
-    with open(sys.argv[1], encoding="utf-8") as fh:
-        state = json.load(fh)
-    key = state.get("default_integration") or state.get("integration") or ""
-    settings = state.get("integration_settings")
-    separator = "."
-    if isinstance(key, str) and isinstance(settings, dict):
-        entry = settings.get(key)
-        if isinstance(entry, dict) and entry.get("invoke_separator") in {".", "-"}:
-            separator = entry["invoke_separator"]
-    print(separator)
-except Exception:
-    fi
-
-    _SPECIFY_INVOKE_SEPARATOR_CACHE_REPO_ROOT="$repo_root"
     fi
 
     _SPECIFY_INVOKE_SEPARATOR_CACHE_REPO_ROOT="$repo_root"
