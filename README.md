@@ -1,11 +1,10 @@
 # maxdelong.dev
 
-Personal website with tools and experiments. Built with Next.js, TypeScript, Supabase, hosted on Vercel.
+Personal website with tools and experiments.
 
 ## Features
 
 - **Dota 2 Tracker**: Player stats and match analysis (see `apps/dota-tracker/README.md`)
-- Blog (planned)
 - Portfolio (planned)
 
 ## Tech Stack
@@ -39,7 +38,6 @@ npm run build && vercel deploy  # Deploy to Vercel
 ├── app/                 # Main Next.js app
 ├── apps/
 │   ├── dota-tracker/    # Dota 2 tracker
-│   ├── blog/
 │   └── portfolio/
 ├── lib/                 # Shared utilities
 └── .env.local

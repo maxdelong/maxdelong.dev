@@ -17,17 +17,6 @@ Track player stats and match data from the OpenDota API.
 - [ ] Show recent matches
 - [ ] Display hero pool
 
-### Phase 2
-- [ ] Track multiple players (save in DB)
-- [ ] Friend leaderboard
-- [ ] MMR history tracking
-- [ ] Notifications for MMR changes
-
-### Phase 3
-- [ ] Hero comparison
-- [ ] Match analyzer
-- [ ] Personalized recommendations
-
 ## Database Schema
 
 ```sql
@@ -54,8 +43,6 @@ CREATE TABLE mmr_history (
 
 - `GET /api/players/[id]` – Fetch player stats
 - `GET /api/matches/[playerId]` – Recent matches
-- `POST /api/friends` – Add tracked player
-- `GET /api/friends` – Get tracked players
 
 ## Setup
 
