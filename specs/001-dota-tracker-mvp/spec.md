@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Dota 2 Tracker MVP — a player can search for a Dota 2 player by name or Steam ID and see their stats (MMR, win rate, total matches), recent matches, and hero pool. Based on the MVP checklist in apps/dota-tracker/README.md. Multi-player tracking/saving, leaderboards, and MMR history are explicitly out of scope for this MVP (they're Phase 2/3)."
 
@@ -166,5 +166,6 @@ it predated the root constitution, was never referenced by CLAUDE.md as
 authoritative, and contradicted both the root constitution and this
 spec's own Assumptions (no persistence, no MMR history).
 
-**Next step**: All three features are now implemented. Blog and
-Portfolio remain unbuilt registry placeholders.
+**Next step**: Work through [follow-ups.md](./follow-ups.md). Live API
+checks on 2026-11-04 found that FR-002 (MMR) no longer works because
+OpenDota removed `mmr_estimate`, along with other known gaps.

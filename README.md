@@ -2,45 +2,52 @@
 
 Personal website with tools and experiments.
 
-## Features
+## Apps
 
-- **Dota 2 Tracker**: Player stats and match analysis (see `apps/dota-tracker/README.md`)
-- Portfolio (planned)
+- **Dota Tracker**: player stats, recent matches and hero pool from the OpenDota API.
+  Known problems are listed in [follow-ups](./specs/001-dota-tracker-mvp/follow-ups.md).
+- **Dog Tower Defense**: a small browser game. Place dogs to stop squirrels and frogs.
+- **Spotify Tracker**: coming soon.
 
-## Tech Stack
+## Tech stack
 
 - Next.js + React + TypeScript
-- Supabase (PostgreSQL)
 - Vercel hosting
+- Supabase (PostgreSQL) when a feature needs persistence; nothing uses it yet
 
 ## Setup
+
+Requires Node 24. No environment variables are needed.
 
 ```bash
 git clone https://github.com/maxdelong/maxdelong.dev.git
 cd maxdelong.dev
 npm install
+npm run dev  # http://localhost:3000
 ```
 
-Set `.env.local`:
-```
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
-```
+## Checks
+
+CI runs these on `main` and on pull requests:
 
 ```bash
-npm run dev  # Local: http://localhost:3000
-npm run build && vercel deploy  # Deploy to Vercel
+npm run lint
+npm run typecheck
+npm test
+npm run build
 ```
 
 ## Structure
 
+The site is one Next.js app. Each app has its own folder in each of these:
+
 ```
-├── app/                 # Main Next.js app
-├── apps/
-│   ├── dota-tracker/    # Dota 2 tracker
-│   └── portfolio/
-├── lib/                 # Shared utilities
-└── .env.local
+├── app/<slug>/         # Routes
+├── components/<slug>/  # UI
+├── lib/<slug>/         # Logic
+├── lib/apps.ts         # App registry that feeds the sidebar
+├── tests/              # Vitest tests
+└── specs/              # Spec Kit feature specs
 ```
 
-See [Dota 2 Tracker README](./apps/dota-tracker/README.md) for details.
+To add an app, create its folders and add one entry to `lib/apps.ts`.

@@ -1,8 +1,12 @@
 <!--
 Sync Impact Report
-- Version change: [TEMPLATE] → 1.0.0 (initial ratification)
-- Modified principles: n/a (first version)
-- Added sections: Core Principles (5), Technology Constraints, Governance
+- Version change: 1.0.0 → 2.0.0 (MAJOR: Principle III redefined incompatibly)
+- Modified principles:
+  - II. Type Safety End-to-End: types flow from the data source, not specifically Supabase
+  - III. App Isolation: sub-apps under apps/* replaced by feature folders in one Next.js app
+  - V. Always Deployable: CI now checks main and pull requests
+- Modified sections: Technology Constraints (Supabase is for when persistence is needed)
+- Added sections: none
 - Removed sections: none
 - Follow-up TODOs: none
 -->
@@ -18,15 +22,16 @@ solo-maintained side project — every layer of indirection has to be justified
 by a problem it solves today, not one it might solve later.
 
 ### II. Type Safety End-to-End
-TypeScript is used everywhere. Types flow from the Supabase schema through
-API routes to the UI without being widened or re-declared along the way.
-`any` is not used to route around a type error; the underlying type is fixed
-instead.
+TypeScript is used everywhere. Types flow from the data source (an external
+API or a database schema) through to the UI without being widened or
+re-declared along the way. `any` is not used to route around a type error;
+the underlying type is fixed instead.
 
 ### III. App Isolation
-Each sub-app under `apps/*` owns its own routes, components, and logic.
-Code only moves into `lib/` once it is genuinely shared by more than one
-sub-app. Sub-apps do not import from one another directly.
+The site is one Next.js app and one deployment. Each app's code lives in its
+own feature folders: `app/<slug>/`, `components/<slug>/`, and `lib/<slug>/`.
+Code only moves to the top level of `lib/` or `components/` once it is
+genuinely shared by more than one app. Apps do not import from one another.
 
 ### IV. Pragmatic Testing
 Critical logic — API routes, data transforms, anything that touches the
@@ -36,19 +41,20 @@ effort should go where correctness actually matters (data integrity,
 external API integration) rather than into coverage percentage.
 
 ### V. Always Deployable
-`main` always builds and deploys cleanly to Vercel. Broken states are kept
-to short-lived branches, never left on `main`.
+`main` always builds and deploys cleanly to Vercel. CI checks `main` and
+pull requests. Broken states are kept to short-lived branches, never left on
+`main`.
 
 ## Technology Constraints
 
 - **Framework**: Next.js + React + TypeScript
-- **Data**: Supabase (PostgreSQL)
+- **Data**: Supabase (PostgreSQL) when a feature needs persistence; no feature uses it yet
 - **Hosting**: Vercel
-- **External APIs**: OpenDota API (dota-tracker app), others as sub-apps require them
+- **External APIs**: OpenDota API (dota-tracker app), others as apps require them
 
-Sub-apps may introduce app-specific dependencies (e.g. a charting library for
+Apps may introduce app-specific dependencies (e.g. a charting library for
 one app) without requiring a constitution amendment, as long as they don't
-conflict with these constraints or leak into other sub-apps.
+conflict with these constraints or leak into other apps.
 
 ## Governance
 
@@ -59,4 +65,4 @@ or redefined incompatibly; MINOR: principle or section added; PATCH:
 clarification/wording). There is no separate compliance-review process
 beyond the author's own judgment, consistent with Principle I.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-09 | **Last Amended**: 2026-08-09
+**Version**: 2.0.0 | **Ratified**: 2026-08-09 | **Last Amended**: 2026-11-04

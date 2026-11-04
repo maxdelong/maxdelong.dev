@@ -10,25 +10,33 @@ for the full pitch.
 ## Stack
 
 - Next.js + React + TypeScript
-- Supabase (PostgreSQL)
 - Vercel hosting
+- Supabase (PostgreSQL) when a feature needs persistence; nothing uses it yet
 
 ## Structure
 
-Monorepo-style: each sub-app under `apps/*` is self-contained (routes,
-components, logic). Shared code only goes in `lib/`. Current/planned
-sub-apps:
+One Next.js app and one deployment. Each app's code lives in
+`app/<slug>/`, `components/<slug>/`, and `lib/<slug>/`, and apps don't import
+from one another. Registering an app takes one entry in `lib/apps.ts`.
 
-- `apps/dota-tracker/` — Dota 2 player stats via the OpenDota API
-- `apps/blog/`, `apps/portfolio/` — planned
+- `dota-tracker` — Dota 2 player stats via the OpenDota API; known problems
+  are in `specs/001-dota-tracker-mvp/follow-ups.md`
+- `dog-tower-defense` — browser game; rules are pure functions in `lib/`
+- `spotify-tracker` — coming-soon placeholder
 
 ## Commands
 
 ```bash
 npm install
-npm run dev                    # local dev, http://localhost:3000
-npm run build && vercel deploy # deploy
+npm run dev       # local dev, http://localhost:3000
+npm run lint
+npm run typecheck
+npm test
+npm run build
 ```
+
+CI runs lint, typecheck, tests and build on `main` and on pull requests.
+Vercel deploys from GitHub.
 
 ## Conventions
 

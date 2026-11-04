@@ -149,28 +149,25 @@ Task: "Write combat tests in tests/lib/dog-tower-defense/combat.test.ts"
 
 ## Status & Next Step
 
-**Current state**: Implemented. All 19 tasks complete; 18/18 project-wide
-tests pass (15 for this feature), lint is clean, `npm run build` succeeds.
-Manually verified in a real headless browser: homepage lists "Dog Tower
-Defense" as a working link, the canvas renders the yard/pond/both paths/
-placement spots, clicking a spot places a dog that automatically defeats
-nearby squirrels and frogs, bones deduct on placement and increase on
-kills, and a full playthrough reaches both a "You lose" (poor placement)
-and a "You win! 🎉" (good placement near the path convergence) state, each
-with a working "Play again" restart. No console errors observed.
+**Current state**: Implemented, then reworked on 2026-11-04 (FR-012 to
+FR-015). The first version's wave spawned all at once and ended in 2.78s at
+60Hz (1.16s at 144Hz), and three of its six spots could reach nothing.
+
+Verified after the rework: 47/47 project-wide tests pass, lint and typecheck
+are clean, `npm run build` succeeds. The production build was played in
+headless Chrome: the game waits for Start, a third dog is rejected without
+bones, spot-1 + spot-6 won with 4 lives after about 26s, no dogs lost after
+about 18s, "Play again" resets the game, placement works at 390px wide, and
+there were no console errors.
 
 **Implementation notes**:
 
-- Combat is instant-defeat-on-range (no HP/damage system) — the spec
-  never specifies multi-hit combat, and this is the simplest rule that
-  satisfies FR-003.
-- Game constants (starting lives: 5, starting bones: 6, dog cost: 3, dog
-  range: 90, wave: 7 intruders) are implementation choices not dictated by
-  the spec; verified empirically to make the game both losable (careless
-  placement) and winnable (deliberate placement near the path
-  convergence near the porch).
+- A dog defeats one intruder per attack and then waits out a cooldown. There
+  is still no HP system.
+- Tuned constants: 5 lives, 6 bones, dog cost 3, range 90, 2.2s cooldown, 16
+  intruders spawned 0.8s apart, squirrels 70 px/s, frogs 45 px/s.
+- `tests/lib/dog-tower-defense/gameState.test.ts` plays whole games to enforce
+  balance (SC-005) and frame-rate independence, so re-tuning that breaks
+  either fails the tests.
 
-**Next step**: Both `002-site-shell` and `003-dog-tower-defense` are now
-fully implemented. `001-dota-tracker-mvp` is the only remaining feature —
-it still needs its constitution conflict resolved, then `/speckit-plan`,
-`/speckit-tasks`, and `/speckit-implement`.
+**Next step**: None planned.

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-16
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "A tiny, dog-themed tower defense game as a new app on the site (registered in the shell's app registry alongside Dota Tracker and Spotify Tracker, this one shipping as "available" not "coming soon"). Keep it extremely simple: dogs are the "towers" defending a yard from a single wave-based line of intruders (e.g. squirrels) walking a fixed path toward a goal (e.g. a bone or the porch). One dog type, one intruder type, no accounts, no API keys, no backend — pure client-side game state. This is a lightweight spec — keep it terse, don't over-elaborate scope."
 
@@ -103,6 +103,13 @@ result is shown with a restart control that starts a fresh game.
   to play.
 - **FR-011**: The pond MUST be shown as a fixed feature of the yard and
   MUST NOT be a valid dog-placement spot.
+- **FR-012**: The wave MUST NOT begin until the visitor starts it, and dogs
+  MUST be placeable both before and during the wave.
+- **FR-013**: Intruders MUST enter the yard one at a time, and game speed
+  MUST NOT depend on the display's frame rate.
+- **FR-014**: A dog MUST defeat one intruder per attack and wait out a
+  cooldown between attacks.
+- **FR-015**: Every placement spot MUST be able to reach at least one path.
 
 ### Key Entities
 
@@ -131,6 +138,8 @@ result is shown with a restart control that starts a fresh game.
   win or loss.
 - **SC-004**: The game is fully playable after the initial page load with
   no further network requests, accounts, or API keys.
+- **SC-005**: No dogs, or any single dog, loses; two dogs covering both
+  paths win. Automated tests enforce this.
 
 ## Assumptions
 
@@ -149,9 +158,8 @@ result is shown with a restart control that starts a fresh game.
 
 ## Status & Next Step
 
-**Current state**: Implemented and verified — tests pass, lint is clean,
-production build succeeds, and the game was manually played through to
-both a win and a loss in a real browser. See [tasks.md](./tasks.md) for
-details.
+**Current state**: Implemented. Pacing and balance were reworked on
+2026-11-04 (FR-012 to FR-015) after simulation showed the first version's
+wave ended in under 3 seconds. See [tasks.md](./tasks.md) for details.
 
-**Next step**: `001-dota-tracker-mvp` is the only remaining feature.
+**Next step**: None planned.

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-16
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Site shell and landing page: convert this project to run as one unified Next.js website. A homepage at "/" with a left sidebar that lists and links to each available app/tool (starting with Dota Tracker). Each app is segmented into its own folder under a shared app registry so new apps can be added by dropping in a folder and one registry entry, without touching existing apps' code. This replaces the assumption of separately-deployable sub-apps under apps/* — everything ships as a single Vercel deployment."
 
@@ -166,6 +166,5 @@ unaffected.
 production build succeeds. See [tasks.md](./tasks.md) for the full task
 list and implementation notes.
 
-**Next step**: Implement `003-dog-tower-defense`
-(`/speckit-implement`) — its Setup phase depends on the `lib/apps.ts`
-this feature created.
+**Next step**: None. Add a `not-found` and `error` page if FR-008 needs
+hardening (tracked in `001-dota-tracker-mvp/follow-ups.md`).
