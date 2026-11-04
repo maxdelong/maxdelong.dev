@@ -1,26 +1,69 @@
 import { INITIAL_PLACEMENT_SPOTS, pathFor, pointAtProgress } from "./paths";
-import type { Dog, Intruder } from "./types";
+import type { Attack, Dog, Intruder, Point } from "./types";
 
-function distance(a: { x: number; y: number }, b: { x: number; y: number }): number {
+export const DOG_COOLDOWN_MS = 2200;
+export const ATTACK_DISPLAY_MS = 150;
+
+function distance(a: Point, b: Point): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-function dogPosition(dog: Dog): { x: number; y: number } {
+export function dogPosition(dog: Dog): Point {
   const spot = INITIAL_PLACEMENT_SPOTS.find((s) => s.id === dog.spotId);
   if (!spot) throw new Error(`Unknown placement spot: ${dog.spotId}`);
   return spot.position;
 }
 
-/** Returns a new intruders array where any alive intruder within range of any dog is defeated. */
-export function resolveAttacks(dogs: Dog[], intruders: Intruder[]): Intruder[] {
-  return intruders.map((intruder) => {
-    if (!intruder.alive) return intruder;
+export function intruderPosition(intruder: Intruder): Point {
+  return pointAtProgress(pathFor(intruder.type), intruder.pathProgress);
+}
 
-    const position = pointAtProgress(pathFor(intruder.type), intruder.pathProgress);
-    const inRange = dogs.some(
-      (dog) => distance(dogPosition(dog), position) <= dog.range
-    );
+export function isInYard(intruder: Intruder, elapsedMs: number): boolean {
+  return intruder.alive && elapsedMs >= intruder.spawnAtMs;
+}
 
-    return inRange ? { ...intruder, alive: false } : intruder;
+/**
+ * Each ready dog defeats one in-range intruder, preferring the one furthest
+ * along its path, then waits out its cooldown. Two dogs never spend an attack
+ * on the same intruder.
+ */
+export function resolveAttacks(
+  dogs: Dog[],
+  intruders: Intruder[],
+  elapsedMs: number,
+  deltaMs: number
+): { dogs: Dog[]; intruders: Intruder[]; attacks: Attack[] } {
+  const defeated = new Set<string>();
+  const attacks: Attack[] = [];
+
+  const nextDogs = dogs.map((dog) => {
+    const cooldownMs = Math.max(0, dog.cooldownMs - deltaMs);
+    if (cooldownMs > 0) return { ...dog, cooldownMs };
+
+    const from = dogPosition(dog);
+    const target = intruders
+      .filter(
+        (i) =>
+          isInYard(i, elapsedMs) &&
+          !defeated.has(i.id) &&
+          distance(from, intruderPosition(i)) <= dog.range
+      )
+      .sort((a, b) => b.pathProgress - a.pathProgress)[0];
+    if (!target) return { ...dog, cooldownMs };
+
+    defeated.add(target.id);
+    attacks.push({
+      id: `${dog.id}-${target.id}`,
+      from,
+      to: intruderPosition(target),
+      remainingMs: ATTACK_DISPLAY_MS,
+    });
+    return { ...dog, cooldownMs: DOG_COOLDOWN_MS };
   });
+
+  return {
+    dogs: nextDogs,
+    intruders: intruders.map((i) => (defeated.has(i.id) ? { ...i, alive: false } : i)),
+    attacks,
+  };
 }

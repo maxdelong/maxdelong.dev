@@ -26,12 +26,16 @@ export function Sidebar() {
           open ? "block" : "hidden"
         }`}
       >
-        <Link href="/" className="mb-4 block text-lg font-semibold text-gray-900">
+        <Link
+          href="/"
+          onClick={() => setOpen(false)}
+          className="mb-4 block text-lg font-semibold text-gray-900"
+        >
           maxdelong.dev
         </Link>
         <nav className="flex flex-col gap-1">
           {apps.map((app) => (
-            <SidebarEntry key={app.slug} app={app} />
+            <SidebarEntry key={app.slug} app={app} onNavigate={() => setOpen(false)} />
           ))}
         </nav>
       </aside>

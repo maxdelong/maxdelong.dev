@@ -44,6 +44,12 @@ function segmentLength(a: { x: number; y: number }, b: { x: number; y: number })
   return Math.hypot(b.x - a.x, b.y - a.y);
 }
 
+export function pathLength(path: GamePath): number {
+  return path.waypoints
+    .slice(1)
+    .reduce((sum, wp, i) => sum + segmentLength(path.waypoints[i], wp), 0);
+}
+
 /** Position of a point at `progress` (0-1) along a path's waypoints. */
 export function pointAtProgress(
   path: GamePath,
@@ -76,9 +82,9 @@ export function pointAtProgress(
 
 export const INITIAL_PLACEMENT_SPOTS: PlacementSpot[] = [
   { id: "spot-1", position: { x: 100, y: 60 }, occupiedBy: null },
-  { id: "spot-2", position: { x: 300, y: 220 }, occupiedBy: null },
-  { id: "spot-3", position: { x: 100, y: 300 }, occupiedBy: null },
+  { id: "spot-2", position: { x: 285, y: 270 }, occupiedBy: null },
+  { id: "spot-3", position: { x: 120, y: 280 }, occupiedBy: null },
   { id: "spot-4", position: { x: 620, y: 320 }, occupiedBy: null },
   { id: "spot-5", position: { x: 500, y: 150 }, occupiedBy: null },
-  { id: "spot-6", position: { x: 700, y: 150 }, occupiedBy: null },
+  { id: "spot-6", position: { x: 700, y: 170 }, occupiedBy: null },
 ];

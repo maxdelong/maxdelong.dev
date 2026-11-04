@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { dogPosition, intruderPosition, isInYard } from "@/lib/dog-tower-defense/combat";
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
@@ -8,13 +9,18 @@ import {
   POND,
   PORCH,
   SQUIRREL_PATH,
-  pointAtProgress,
 } from "@/lib/dog-tower-defense/paths";
-import { createInitialGameState, restart, tick, tryPlaceDog } from "@/lib/dog-tower-defense/gameState";
+import {
+  createInitialGameState,
+  restart,
+  startWave,
+  tick,
+  tryPlaceDog,
+} from "@/lib/dog-tower-defense/gameState";
 import type { GameState } from "@/lib/dog-tower-defense/types";
 import { Hud } from "./Hud";
 
-const SPOT_HIT_RADIUS = 24;
+const SPOT_HIT_RADIUS = 32;
 
 function drawPath(ctx: CanvasRenderingContext2D, waypoints: { x: number; y: number }[], color: string) {
   ctx.strokeStyle = color;
@@ -55,6 +61,18 @@ function draw(ctx: CanvasRenderingContext2D, state: GameState) {
   ctx.fillStyle = "#8a5a3b";
   ctx.fillRect(PORCH.x - 16, PORCH.y - 16, 32, 32);
 
+  // dog ranges
+  ctx.lineWidth = 1;
+  for (const dog of state.dogs) {
+    const position = dogPosition(dog);
+    ctx.beginPath();
+    ctx.arc(position.x, position.y, dog.range, 0, Math.PI * 2);
+    ctx.fillStyle = "#f2b70522";
+    ctx.fill();
+    ctx.strokeStyle = "#f2b70588";
+    ctx.stroke();
+  }
+
   // placement spots
   for (const spot of state.spots) {
     ctx.beginPath();
@@ -65,38 +83,46 @@ function draw(ctx: CanvasRenderingContext2D, state: GameState) {
     ctx.stroke();
   }
 
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
   // dogs
+  ctx.font = "22px sans-serif";
   for (const dog of state.dogs) {
-    const spot = state.spots.find((s) => s.id === dog.spotId);
-    if (!spot) continue;
-    ctx.font = "22px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🐶", spot.position.x, spot.position.y);
+    const position = dogPosition(dog);
+    ctx.fillText("🐶", position.x, position.y);
   }
 
   // intruders
+  ctx.font = "20px sans-serif";
   for (const intruder of state.intruders) {
-    if (!intruder.alive) continue;
-    const path = intruder.type === "squirrel" ? SQUIRREL_PATH : FROG_PATH;
-    const pos = pointAtProgress(path, intruder.pathProgress);
-    ctx.font = "20px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(intruder.type === "squirrel" ? "🐿️" : "🐸", pos.x, pos.y);
+    if (!isInYard(intruder, state.elapsedMs)) continue;
+    const position = intruderPosition(intruder);
+    ctx.fillText(intruder.type === "squirrel" ? "🐿️" : "🐸", position.x, position.y);
+  }
+
+  // attacks
+  ctx.strokeStyle = "#d9480f";
+  ctx.lineWidth = 3;
+  for (const attack of state.attacks) {
+    ctx.beginPath();
+    ctx.moveTo(attack.from.x, attack.from.y);
+    ctx.lineTo(attack.to.x, attack.to.y);
+    ctx.stroke();
   }
 }
 
 export function GameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, setState] = useState<GameState>(() => createInitialGameState());
-  const stateRef = useRef(state);
-  stateRef.current = state;
 
   useEffect(() => {
     let frameId: number;
-    const loop = () => {
-      setState((prev) => (prev.status === "playing" ? tick(prev) : prev));
+    let lastTime: number | null = null;
+    const loop = (time: number) => {
+      const deltaMs = lastTime === null ? 0 : time - lastTime;
+      lastTime = time;
+      setState((prev) => tick(prev, deltaMs));
       frameId = requestAnimationFrame(loop);
     };
     frameId = requestAnimationFrame(loop);
@@ -115,7 +141,7 @@ export function GameCanvas() {
     const x = ((e.clientX - rect.left) / rect.width) * CANVAS_WIDTH;
     const y = ((e.clientY - rect.top) / rect.height) * CANVAS_HEIGHT;
 
-    const nearest = stateRef.current.spots.find(
+    const nearest = state.spots.find(
       (spot) => Math.hypot(spot.position.x - x, spot.position.y - y) <= SPOT_HIT_RADIUS
     );
     if (!nearest) return;
@@ -125,13 +151,18 @@ export function GameCanvas() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Hud state={state} onRestart={() => setState(restart())} />
+      <Hud
+        state={state}
+        onStart={() => setState(startWave)}
+        onRestart={() => setState(restart())}
+      />
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
         onClick={handleClick}
-        className="w-full max-w-3xl rounded border border-gray-300"
+        aria-label="Yard with two paths leading to the porch. Click a white spot to place a dog."
+        className="w-full max-w-3xl cursor-pointer rounded border border-gray-300"
       />
     </div>
   );

@@ -24,6 +24,8 @@ export interface Dog {
   id: string;
   spotId: string;
   range: number;
+  /** Milliseconds until this dog can attack again; 0 means ready. */
+  cooldownMs: number;
 }
 
 export interface Intruder {
@@ -31,9 +33,19 @@ export interface Intruder {
   type: IntruderType;
   pathProgress: number;
   alive: boolean;
+  /** Wave time at which this intruder enters the yard. */
+  spawnAtMs: number;
 }
 
-export type GameStatus = "playing" | "won" | "lost";
+/** A recent dog attack, kept briefly so the canvas can draw it. */
+export interface Attack {
+  id: string;
+  from: Point;
+  to: Point;
+  remainingMs: number;
+}
+
+export type GameStatus = "ready" | "playing" | "won" | "lost";
 
 export interface GameState {
   lives: number;
@@ -41,5 +53,8 @@ export interface GameState {
   dogs: Dog[];
   spots: PlacementSpot[];
   intruders: Intruder[];
+  attacks: Attack[];
+  /** Time since the wave started. */
+  elapsedMs: number;
   status: GameStatus;
 }
