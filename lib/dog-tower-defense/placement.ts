@@ -1,37 +1,21 @@
-import type { PlacementSpot } from "./types";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, PATH_WIDTH, POND, PORCH, distanceToPath } from "./paths";
+import type { Dog, Point } from "./types";
 
-export const DOG_COST = 3;
+export const DOG_RADIUS = 15;
 
-export type PlacementCheck = { ok: true } | { ok: false; reason: string };
+/** Whether a dog can stand here: inside the yard, and clear of paths, the pond, the porch and other dogs. */
+export function canPlaceAt(point: Point, dogs: Pick<Dog, "x" | "y">[]): boolean {
+  const { x, y } = point;
+  if (x < DOG_RADIUS || y < DOG_RADIUS) return false;
+  if (x > CANVAS_WIDTH - DOG_RADIUS || y > CANVAS_HEIGHT - DOG_RADIUS) return false;
 
-export function canPlaceDog(
-  spots: PlacementSpot[],
-  spotId: string,
-  bones: number
-): PlacementCheck {
-  const spot = spots.find((s) => s.id === spotId);
-  if (!spot) return { ok: false, reason: "not-a-valid-spot" };
-  if (spot.occupiedBy) return { ok: false, reason: "spot-occupied" };
-  if (bones < DOG_COST) return { ok: false, reason: "insufficient-bones" };
-  return { ok: true };
-}
+  if (distanceToPath(point) < PATH_WIDTH / 2 + DOG_RADIUS) return false;
 
-export type PlaceDogResult =
-  | { ok: true; spots: PlacementSpot[]; remainingBones: number }
-  | { ok: false; reason: string };
+  const pondX = (x - (POND.x + POND.width / 2)) / (POND.width / 2 + DOG_RADIUS);
+  const pondY = (y - (POND.y + POND.height / 2)) / (POND.height / 2 + DOG_RADIUS);
+  if (pondX * pondX + pondY * pondY < 1) return false;
 
-export function placeDog(
-  spots: PlacementSpot[],
-  spotId: string,
-  bones: number,
-  dogId: string
-): PlaceDogResult {
-  const check = canPlaceDog(spots, spotId, bones);
-  if (!check.ok) return check;
+  if (Math.hypot(x - PORCH.x, y - PORCH.y) < 24 + DOG_RADIUS) return false;
 
-  const nextSpots = spots.map((s) =>
-    s.id === spotId ? { ...s, occupiedBy: dogId } : s
-  );
-
-  return { ok: true, spots: nextSpots, remainingBones: bones - DOG_COST };
+  return dogs.every((dog) => Math.hypot(dog.x - x, dog.y - y) >= DOG_RADIUS * 2);
 }

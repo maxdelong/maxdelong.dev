@@ -162,4 +162,6 @@ result is shown with a restart control that starts a fresh game.
 2026-11-04 (FR-012 to FR-015) after simulation showed the first version's
 wave ended in under 3 seconds. See [tasks.md](./tasks.md) for details.
 
-**Next step**: None planned.
+**Next step**: None. The game's rules are now defined by
+`specs/004-dog-breeds-and-upgrades/spec.md`, which replaces this spec's single
+dog type, fixed spots and single wave.

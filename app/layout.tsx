@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import "./globals.css";
 
+const sans = Geist({ subsets: ["latin"], variable: "--font-geist" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+
 export const metadata: Metadata = {
-  title: "maxdelong.dev",
-  description: "Personal site with tools and experiments.",
+  title: {
+    default: "maxdelong.dev",
+    template: "%s · maxdelong.dev",
+  },
+  description: "Personal site with tools, games and experiments.",
 };
 
 export default function RootLayout({
@@ -13,11 +20,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
         <div className="flex min-h-screen flex-col md:flex-row">
           <Sidebar />
-          <main className="min-w-0 flex-1 p-6 pt-20 md:p-10">{children}</main>
+          <main className="min-w-0 flex-1 px-4 py-5 md:px-8 md:py-6">
+            <div className="mx-auto max-w-5xl">{children}</div>
+          </main>
         </div>
       </body>
     </html>

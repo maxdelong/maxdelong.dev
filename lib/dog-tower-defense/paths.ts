@@ -1,13 +1,15 @@
-import type { GamePath, PlacementSpot, Pond } from "./types";
+import type { Lane, Point } from "./types";
 
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 480;
+export const PATH_WIDTH = 28;
 
-export const PORCH: { x: number; y: number } = { x: 760, y: 240 };
+export const PORCH: Point = { x: 760, y: 240 };
 
-export const SQUIRREL_PATH: GamePath = {
-  id: "squirrel",
-  waypoints: [
+export const POND = { x: 340, y: 10, width: 110, height: 70 };
+
+export const WAYPOINTS: Record<Lane, Point[]> = {
+  yard: [
     { x: 0, y: 120 },
     { x: 200, y: 120 },
     { x: 200, y: 360 },
@@ -15,15 +17,7 @@ export const SQUIRREL_PATH: GamePath = {
     { x: 500, y: 240 },
     PORCH,
   ],
-};
-
-export const POND: Pond = {
-  bounds: { x: 340, y: 10, width: 110, height: 70 },
-};
-
-export const FROG_PATH: GamePath = {
-  id: "frog",
-  waypoints: [
+  pond: [
     { x: 395, y: 80 },
     { x: 395, y: 200 },
     { x: 620, y: 200 },
@@ -32,59 +26,52 @@ export const FROG_PATH: GamePath = {
   ],
 };
 
-export const PATHS: GamePath[] = [SQUIRREL_PATH, FROG_PATH];
-
-export function pathFor(type: GamePath["id"]): GamePath {
-  const path = PATHS.find((p) => p.id === type);
-  if (!path) throw new Error(`No path for intruder type: ${type}`);
-  return path;
+function buildLengths(points: Point[]): number[] {
+  return points.slice(1).map((p, i) => Math.hypot(p.x - points[i].x, p.y - points[i].y));
 }
 
-function segmentLength(a: { x: number; y: number }, b: { x: number; y: number }): number {
-  return Math.hypot(b.x - a.x, b.y - a.y);
-}
+const SEGMENTS: Record<Lane, number[]> = {
+  yard: buildLengths(WAYPOINTS.yard),
+  pond: buildLengths(WAYPOINTS.pond),
+};
 
-export function pathLength(path: GamePath): number {
-  return path.waypoints
-    .slice(1)
-    .reduce((sum, wp, i) => sum + segmentLength(path.waypoints[i], wp), 0);
-}
+export const LANE_LENGTH: Record<Lane, number> = {
+  yard: SEGMENTS.yard.reduce((sum, len) => sum + len, 0),
+  pond: SEGMENTS.pond.reduce((sum, len) => sum + len, 0),
+};
 
-/** Position of a point at `progress` (0-1) along a path's waypoints. */
-export function pointAtProgress(
-  path: GamePath,
-  progress: number
-): { x: number; y: number } {
-  const clamped = Math.min(1, Math.max(0, progress));
-  const { waypoints } = path;
-  if (waypoints.length === 1) return waypoints[0];
+/** The point `distance` pixels along a lane, clamped to its ends. */
+export function pointAtDistance(lane: Lane, distance: number): Point {
+  const points = WAYPOINTS[lane];
+  const segments = SEGMENTS[lane];
+  let left = Math.max(0, distance);
 
-  const segmentLengths = waypoints.slice(1).map((wp, i) => segmentLength(waypoints[i], wp));
-  const totalLength = segmentLengths.reduce((sum, len) => sum + len, 0);
-  const targetDistance = clamped * totalLength;
-
-  let travelled = 0;
-  for (let i = 0; i < segmentLengths.length; i++) {
-    const len = segmentLengths[i];
-    if (travelled + len >= targetDistance || i === segmentLengths.length - 1) {
-      const remaining = len === 0 ? 0 : (targetDistance - travelled) / len;
-      const a = waypoints[i];
-      const b = waypoints[i + 1];
+  for (let i = 0; i < segments.length; i++) {
+    if (left <= segments[i]) {
+      const t = left / segments[i];
       return {
-        x: a.x + (b.x - a.x) * Math.min(1, Math.max(0, remaining)),
-        y: a.y + (b.y - a.y) * Math.min(1, Math.max(0, remaining)),
+        x: points[i].x + (points[i + 1].x - points[i].x) * t,
+        y: points[i].y + (points[i + 1].y - points[i].y) * t,
       };
     }
-    travelled += len;
+    left -= segments[i];
   }
-  return waypoints[waypoints.length - 1];
+  return points[points.length - 1];
 }
 
-export const INITIAL_PLACEMENT_SPOTS: PlacementSpot[] = [
-  { id: "spot-1", position: { x: 100, y: 60 }, occupiedBy: null },
-  { id: "spot-2", position: { x: 285, y: 270 }, occupiedBy: null },
-  { id: "spot-3", position: { x: 120, y: 280 }, occupiedBy: null },
-  { id: "spot-4", position: { x: 620, y: 320 }, occupiedBy: null },
-  { id: "spot-5", position: { x: 500, y: 150 }, occupiedBy: null },
-  { id: "spot-6", position: { x: 700, y: 170 }, occupiedBy: null },
-];
+function distanceToSegment(p: Point, a: Point, b: Point): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(p.x - (a.x + dx * t), p.y - (a.y + dy * t));
+}
+
+export function distanceToPath(p: Point): number {
+  let best = Infinity;
+  for (const points of Object.values(WAYPOINTS)) {
+    for (let i = 0; i < points.length - 1; i++) {
+      best = Math.min(best, distanceToSegment(p, points[i], points[i + 1]));
+    }
+  }
+  return best;
+}

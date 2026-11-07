@@ -6,22 +6,24 @@ function formatDuration(seconds: number): string {
   return `${minutes}:${remaining.toString().padStart(2, "0")}`;
 }
 
-export function RecentMatches({ matches }: { matches: Match[] }) {
+export function RecentMatches({ matches }: Readonly<{ matches: Match[] }>) {
   if (matches.length === 0) {
-    return <p className="text-sm text-gray-500">No recent matches found.</p>;
+    return <p className="text-sm text-muted">No recent matches found.</p>;
   }
 
   return (
-    <ul className="divide-y divide-gray-200 rounded border border-gray-200">
+    <ul className="divide-y divide-line rounded-lg border border-line bg-panel">
       {matches.map((match) => (
-        <li key={match.matchId} className="flex items-center justify-between px-4 py-2 text-sm">
-          <span className={match.won ? "font-medium text-green-700" : "font-medium text-red-700"}>
+        <li key={match.matchId} className="flex items-center gap-3 px-3 py-1.5 text-[13px]">
+          <span
+            className={`w-9 font-medium ${
+              match.won ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"
+            }`}
+          >
             {match.won ? "Win" : "Loss"}
           </span>
-          <span className="text-gray-500">{formatDuration(match.durationSeconds)}</span>
-          <span className="text-gray-500">
-            {new Date(match.playedAt * 1000).toLocaleDateString()}
-          </span>
+          <span className="flex-1 tabular-nums text-muted">{formatDuration(match.durationSeconds)}</span>
+          <span className="text-muted">{new Date(match.playedAt * 1000).toLocaleDateString()}</span>
         </li>
       ))}
     </ul>

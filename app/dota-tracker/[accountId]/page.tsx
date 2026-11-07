@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPlayerHeroPool, getPlayerMatches, getPlayerProfile } from "@/lib/dota-tracker/opendota";
+import { PageHeader } from "@/components/PageHeader";
 import { PlayerStats } from "@/components/dota-tracker/PlayerStats";
 import { RecentMatches } from "@/components/dota-tracker/RecentMatches";
 import { HeroPool } from "@/components/dota-tracker/HeroPool";
@@ -20,34 +21,39 @@ export default async function PlayerPage({
 
   if (!profileResult.ok) {
     return (
-      <div className="max-w-2xl">
-        <p className="text-gray-700">
+      <div className="max-w-2xl rounded-xl border border-line bg-panel p-4">
+        <p className="text-sm text-ink">
           {profileResult.reason === "not-found"
             ? "Player not found."
             : "Stats are unavailable for this player right now."}
         </p>
-        <Link href="/dota-tracker" className="mt-4 inline-block text-sm text-gray-900 underline">
-          Back to search
+        <Link href="/dota-tracker" className="mt-2 inline-block text-sm font-medium text-accent hover:underline">
+          ← Back to search
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="mb-4 text-2xl font-bold text-gray-900">{profileResult.data.displayName}</h1>
+    <div className="max-w-3xl">
+      <Link href="/dota-tracker" className="mb-2 inline-block text-xs text-muted hover:text-ink">
+        ← Search
+      </Link>
+      <PageHeader title={profileResult.data.displayName} />
 
       <PlayerStats profile={profileResult.data} />
 
-      <section className="mt-6">
-        <h2 className="mb-2 text-lg font-semibold text-gray-900">Recent matches</h2>
-        <RecentMatches matches={matchesResult.ok ? matchesResult.data : []} />
-      </section>
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <section>
+          <h2 className="mb-1.5 text-sm font-semibold text-ink">Recent matches</h2>
+          <RecentMatches matches={matchesResult.ok ? matchesResult.data : []} />
+        </section>
 
-      <section className="mt-6">
-        <h2 className="mb-2 text-lg font-semibold text-gray-900">Hero pool</h2>
-        <HeroPool heroes={heroesResult.ok ? heroesResult.data : []} />
-      </section>
+        <section>
+          <h2 className="mb-1.5 text-sm font-semibold text-ink">Hero pool</h2>
+          <HeroPool heroes={heroesResult.ok ? heroesResult.data : []} />
+        </section>
+      </div>
     </div>
   );
 }
